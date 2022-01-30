@@ -62,7 +62,7 @@ if action == "left" || action == "right" {
         exit(1)
     }
 
-    let direction = action == "left" ? 1 : -1
+    let direction = action == "left" ? -1 : 1
     print("direction:", direction)
     
     let currentTimestamp = Date().timeIntervalSince1970
