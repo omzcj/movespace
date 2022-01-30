@@ -39,16 +39,13 @@ func displayNotification(message: String) -> Void {
 let kCGSAllSpacesMask = 1 << 0 | 1 << 1 | 1 << 2
 
 func currentSpaces() -> [Int] {
-    let edge = UserDefaults.standard.integer(forKey: "edge")
-    print("edge:", edge)
-
     let allSpaces = CGSCopySpaces(CGSMainConnectionID(), kCGSAllSpacesMask) as! [Int]
     print("allSpaces:", allSpaces)
 
-    let innerSpaces = allSpaces.filter({$0 <= edge})
+    let innerSpaces = (UserDefaults.standard.array(forKey: "innerSpaces") ?? []) as! [Int]
     print("innerSpaces:", innerSpaces)
-
-    let outterSpaces = allSpaces.filter({$0 > edge})
+    
+    let outterSpaces = allSpaces.filter({!innerSpaces.contains($0)})
     print("outterSpaces:", outterSpaces)
 
     let currentSpaceID = CGSGetActiveSpace(CGSMainConnectionID())
@@ -60,8 +57,8 @@ func currentSpaces() -> [Int] {
 }
 
 if action == "left" || action == "right" {
-    guard UserDefaults.standard.integer(forKey: "edge") != 0 else {
-        displayNotification(message: "movespace edge")
+    guard UserDefaults.standard.integer(forKey: "innerSpaces") != 0 else {
+        displayNotification(message: "movespace reset")
         exit(1)
     }
 
@@ -126,10 +123,13 @@ if action == "left" || action == "right" {
     }
     
     UserDefaults.standard.set(moveWindowID, forKey: "windowID")
-} else if action == "edge" {
+} else if action == "reset" {
+    UserDefaults.standard.dictionaryRepresentation().forEach { (key: String, _: Any) in
+        UserDefaults.standard.removeObject(forKey: key)
+    }
     var count = 0
     var lastSpaceID = 0
-    var edgeSpaceID = 0
+    var innerSpaces: [Int] = []
     Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
         if count < 25 {
             let currentSpaceID = CGSGetActiveSpace(CGSMainConnectionID())
@@ -138,11 +138,13 @@ if action == "left" || action == "right" {
                 lastSpaceID = currentSpaceID
                 count = 0
             }
-            edgeSpaceID = max(currentSpaceID, edgeSpaceID)
+            if !innerSpaces.contains(currentSpaceID) {
+                innerSpaces.append(currentSpaceID)
+            }
             count += 1
         } else {
-            displayNotification(message: "edgeSpaceID: " + String(edgeSpaceID))
-            UserDefaults.standard.set(edgeSpaceID, forKey: "edge")
+            displayNotification(message: "innerSpaces: " + innerSpaces.description)
+            UserDefaults.standard.set(innerSpaces, forKey: "innerSpaces")
             exit(0)
         }
     }
@@ -158,18 +160,11 @@ if action == "left" || action == "right" {
             exit(0)
         }
     }
-} else if action == nil {
+} else {
     let _ = currentSpaces()
-    print("movespace help for more")
-} else if action == "help" {
-    print("movespace")
     print("movespace left")
     print("movespace right")
     print("movespace down")
-    print("movespace edge")
+    print("movespace reset")
     print("movespace mouse")
-    print("movespace help")
-} else {
-    print("movespace help for more")
-    exit(1)
 }
