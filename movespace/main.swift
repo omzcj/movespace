@@ -57,7 +57,7 @@ func currentSpaces() -> [Int] {
 }
 
 if action == "left" || action == "right" {
-    guard UserDefaults.standard.integer(forKey: "innerSpaces") != 0 else {
+    guard UserDefaults.standard.array(forKey: "innerSpaces") != nil else {
         displayNotification(message: "movespace reset")
         exit(1)
     }
