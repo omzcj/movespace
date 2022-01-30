@@ -45,7 +45,7 @@ func currentSpaces() -> [Int] {
     let allSpaces = CGSCopySpaces(CGSMainConnectionID(), kCGSAllSpacesMask) as! [Int]
     print("allSpaces:", allSpaces)
 
-    let innerSpaces = allSpaces.filter({$0 < edge})
+    let innerSpaces = allSpaces.filter({$0 <= edge})
     print("innerSpaces:", innerSpaces)
 
     let outterSpaces = allSpaces.filter({$0 > edge})
@@ -61,7 +61,7 @@ func currentSpaces() -> [Int] {
 
 if action == "left" || action == "right" {
     guard UserDefaults.standard.integer(forKey: "edge") != 0 else {
-        displayNotification(message: "movespace edge [Int]")
+        displayNotification(message: "movespace edge")
         exit(1)
     }
 
@@ -126,15 +126,27 @@ if action == "left" || action == "right" {
     }
     
     UserDefaults.standard.set(moveWindowID, forKey: "windowID")
-} else if action == "edge" && params != nil && Int(params!) != nil {
-    let edge = Int(params!)!
-    print("edge:", edge)
-
-    UserDefaults.standard.set(edge, forKey: "edge")
-} else if action == "clean" {
-    UserDefaults.standard.dictionaryRepresentation().forEach { (key: String, _: Any) in
-        UserDefaults.standard.removeObject(forKey: key)
+} else if action == "edge" {
+    var count = 0
+    var lastSpaceID = 0
+    var edgeSpaceID = 0
+    Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+        if count < 25 {
+            let currentSpaceID = CGSGetActiveSpace(CGSMainConnectionID())
+            if lastSpaceID != currentSpaceID {
+                displayNotification(message: String(currentSpaceID))
+                lastSpaceID = currentSpaceID
+                count = 0
+            }
+            edgeSpaceID = max(currentSpaceID, edgeSpaceID)
+            count += 1
+        } else {
+            displayNotification(message: "edgeSpaceID: " + String(edgeSpaceID))
+            UserDefaults.standard.set(edgeSpaceID, forKey: "edge")
+            exit(0)
+        }
     }
+    RunLoop.current.run()
 } else if action == "mouse" {
     let inMain = NSEvent.mouseLocation.y < (NSScreen.main?.frame.size.height)!
     let mainDisplayID = CGMainDisplayID()
@@ -154,8 +166,7 @@ if action == "left" || action == "right" {
     print("movespace left")
     print("movespace right")
     print("movespace down")
-    print("movespace edge [Int]")
-    print("movespace clean")
+    print("movespace edge")
     print("movespace mouse")
     print("movespace help")
 } else {
