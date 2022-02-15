@@ -150,7 +150,7 @@ if action == "left" || action == "right" {
     }
     RunLoop.current.run()
 } else if action == "mouse" {
-    let inMain = NSEvent.mouseLocation.y < (NSScreen.main?.frame.size.height)!
+    let inMain = NSEvent.mouseLocation.y < NSPointInRect(NSEvent.mouseLocation, NSRect(x: 0, y: 0, width: (NSScreen.main?.frame.size.width)!, height: (NSScreen.main?.frame.size.height)!))
     let mainDisplayID = CGMainDisplayID()
     for screen in NSScreen.screens {
         let displayID = screen.deviceDescription[NSDeviceDescriptionKey(rawValue: "NSScreenNumber")]! as! CGDirectDisplayID
