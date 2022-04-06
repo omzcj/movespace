@@ -33,8 +33,9 @@ func displayNotification(message: String) -> Void {
 @_silgen_name("CGSMainConnectionID") func CGSMainConnectionID() -> Int
 @_silgen_name("CGSCopySpaces") func CGSCopySpaces(_: Int, _: Int) -> CFArray
 @_silgen_name("CGSCopySpacesForWindows") func CGSCopySpacesForWindows(_: Int, _: Int, _: CFArray) -> CFArray
-@_silgen_name("CGSRemoveWindowsFromSpaces") func CGSRemoveWindowsFromSpaces(_: Int, _: CFArray, _: CFArray) -> Void
-@_silgen_name("CGSAddWindowsToSpaces") func CGSAddWindowsToSpaces(_: Int, _: CFArray, _: CFArray) -> Void
+// @_silgen_name("CGSRemoveWindowsFromSpaces") func CGSRemoveWindowsFromSpaces(_: Int, _: CFArray, _: CFArray) -> Void
+// @_silgen_name("CGSAddWindowsToSpaces") func CGSAddWindowsToSpaces(_: Int, _: CFArray, _: CFArray) -> Void
+@_silgen_name("CGSMoveWindowsToManagedSpace") func CGSMoveWindowsToManagedSpace(_: Int, _: CFArray, _: Int) -> Void
 
 let kCGSAllSpacesMask = 1 << 0 | 1 << 1 | 1 << 2
 
@@ -101,8 +102,9 @@ if action == "left" || action == "right" {
         let targetSpaceID = currentSpaces[targetSpaceIndex]
         print("targetSpaceID:", targetSpaceID)
         
-        CGSAddWindowsToSpaces(CGSMainConnectionID(), [moveWindowID] as CFArray, [targetSpaceID] as CFArray)
-        CGSRemoveWindowsFromSpaces(CGSMainConnectionID(), [moveWindowID] as CFArray, [moveWindowSpaceID] as CFArray)
+        // CGSAddWindowsToSpaces(CGSMainConnectionID(), [moveWindowID] as CFArray, [targetSpaceID] as CFArray)
+        // CGSRemoveWindowsFromSpaces(CGSMainConnectionID(), [moveWindowID] as CFArray, [moveWindowSpaceID] as CFArray)
+        CGSMoveWindowsToManagedSpace(CGSMainConnectionID(), [moveWindowID] as CFArray, targetSpaceID)
     }
     UserDefaults.standard.set(currentTimestamp, forKey: "timestamp")
     UserDefaults.standard.set(moveWindowID, forKey: "windowID")
@@ -118,8 +120,9 @@ if action == "left" || action == "right" {
     print("currentSpaceID:", currentSpaceID)
     
     if currentSpaceID != moveWindowSpaceID {
-        CGSAddWindowsToSpaces(CGSMainConnectionID(), [moveWindowID] as CFArray, [currentSpaceID] as CFArray)
-        CGSRemoveWindowsFromSpaces(CGSMainConnectionID(), [moveWindowID] as CFArray, [moveWindowSpaceID] as CFArray)
+        // CGSAddWindowsToSpaces(CGSMainConnectionID(), [moveWindowID] as CFArray, [currentSpaceID] as CFArray)
+        // CGSRemoveWindowsFromSpaces(CGSMainConnectionID(), [moveWindowID] as CFArray, [moveWindowSpaceID] as CFArray)
+        CGSMoveWindowsToManagedSpace(CGSMainConnectionID(), [moveWindowID] as CFArray, currentSpaceID)
     }
     
     UserDefaults.standard.set(moveWindowID, forKey: "windowID")
